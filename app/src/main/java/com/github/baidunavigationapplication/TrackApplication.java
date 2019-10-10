@@ -21,6 +21,7 @@ import com.baidu.trace.api.track.OnTrackListener;
 import com.baidu.trace.model.BaseRequest;
 import com.baidu.trace.model.OnCustomAttributeListener;
 import com.baidu.trace.model.ProcessOption;
+import com.baidu.trace.model.ProtocolType;
 import com.github.baidunavigationapplication.utils.CommonUtil;
 import com.github.baidunavigationapplication.utils.NetUtil;
 
@@ -91,11 +92,12 @@ public class TrackApplication extends Application {
         if ("com.baidu.track:remote".equals(CommonUtil.getCurProcessName(mContext))) {
             return;
         }
-
         SDKInitializer.initialize(mContext);
         initView();
         initNotification();
         mClient = new LBSTraceClient(mContext);
+        // 设置协议类型，0为http，1为https
+        mClient.setProtocolType(ProtocolType.HTTPS);
         mTrace = new Trace(serviceId, entityName);
         mTrace.setNotification(notification);
 

@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -40,7 +41,6 @@ import com.baidu.trace.api.track.TrackPoint;
 import com.baidu.trace.model.LocationMode;
 import com.baidu.trace.model.OnTraceListener;
 import com.baidu.trace.model.ProcessOption;
-import com.baidu.trace.model.ProtocolType;
 import com.baidu.trace.model.PushMessage;
 import com.baidu.trace.model.SortType;
 import com.baidu.trace.model.StatusCodes;
@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn_showdialog).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(null!=dialog&&!dialog.isShowing()){
+                if (null != dialog && !dialog.isShowing()) {
                     dialog.show();
                 }
             }
@@ -214,9 +214,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         trackApp.mClient.setInterval(gatherInterval, packInterval);
         setTraceBtnStyle();
         setGatherBtnStyle();
-
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
         initQueryTrace();
     }
 
@@ -224,15 +222,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * 边上传 边轨迹查询
      */
     private void initQueryTrace() {
-        // 设置协议类型，0为http，1为https
-        trackApp.mClient.setProtocolType(ProtocolType.HTTP);
         trackApp.initRequest(historyTrackRequest);
         historyTrackRequest.setEntityName(trackApp.entityName);
 //设置轨迹查询起止时间
 // 开始时间(单位：秒)
-        long startTime =CommonUtil.getCurrentTime();
+        long startTime = CommonUtil.getCurrentTime();
 // 结束时间(单位：秒)
-        long endTime =CommonUtil.getCurrentTime();
+        long endTime = CommonUtil.getCurrentTime();
         historyTrackRequest.setSupplementMode(SupplementMode.walking);
         historyTrackRequest.setSortType(SortType.asc);
 // 设置开始时间
@@ -257,8 +253,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         processOption.setTransportMode(TransportMode.walking);
 // 设置纠偏选项
         historyTrackRequest.setProcessOption(processOption);
-// 查询历史轨迹
-        trackApp.mClient.queryHistoryTrack(historyTrackRequest, trackListener);
         /**
          * 创建里程查询请求实例
          */
@@ -276,8 +270,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         distanceRequest.setProcessOption(processOption);
 // 设置里程填充方式为驾车
         distanceRequest.setSupplementMode(SupplementMode.driving);
-// 查询里程
-        trackApp.mClient.queryDistance(distanceRequest, trackListener);
     }
 
     @Override
@@ -285,11 +277,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (view.getId()) {
             case R.id.btn_trace:
                 if (trackApp.isTraceStarted) {
+                    Log.e(TAG, "已开始服务");
                     trackApp.mClient.stopTrace(trackApp.mTrace, traceListener);
                     stopRealTimeLoc();
                 } else {
+                    Log.e(TAG, "没开始服务");
                     trackApp.mClient.startTrace(trackApp.mTrace, traceListener);
                     if (Constants.DEFAULT_PACK_INTERVAL != packInterval) {
+                        Log.e(TAG, "没开始服务进入判断");
                         stopRealTimeLoc();
                         startRealTimeLoc(packInterval);
                     }
@@ -352,6 +347,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (null != mapUtil) {
                     mapUtil.updateStatus(currentLatLng, true);
                 }
+                Log.e(TAG, "onLatestPointCallback");
+
                 //上传后立刻查询轨迹、里程，更新
                 historyTrackRequest.setEndTime(CommonUtil.getCurrentTime());
                 trackApp.mClient.queryHistoryTrack(historyTrackRequest, trackListener);
@@ -365,8 +362,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onDistanceCallback(DistanceResponse distanceResponse) {
                 super.onDistanceCallback(distanceResponse);
+                Log.e(TAG, "onDistanceCallback");
                 double lowSpeedDistance = distanceResponse.getLowSpeedDistance();
-                dialog.setMessage("轨迹里程："+lowSpeedDistance);
+                dialog.setMessage("轨迹里程：" + lowSpeedDistance);
             }
 
             /**
@@ -374,6 +372,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
              */
             @Override
             public void onHistoryTrackCallback(HistoryTrackResponse response) {
+                Log.e(TAG, "onHistoryTrackCallback");
+
                 int total = response.getTotal();
                 if (StatusCodes.SUCCESS != response.getStatus()) {
                     viewUtil.showToast(MainActivity.this, response.getMessage());
@@ -432,6 +432,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
              */
             @Override
             public void onBindServiceCallback(int errorNo, String message) {
+                Log.e(TAG, "onBindServiceCallback  " + message);
+
                 viewUtil.showToast(MainActivity.this,
                         String.format("onBindServiceCallback, errorNo:%d, message:%s ", errorNo, message));
             }
@@ -453,6 +455,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onStartTraceCallback(int errorNo, String message) {
                 if (StatusCodes.SUCCESS == errorNo || StatusCodes.START_TRACE_NETWORK_CONNECT_FAILED <= errorNo) {
+                    Log.e(TAG, "onStartTraceCallback success" + message);
                     trackApp.isTraceStarted = true;
                     SharedPreferences.Editor editor = trackApp.trackConf.edit();
                     editor.putBoolean("is_trace_started", true);
@@ -460,6 +463,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     setTraceBtnStyle();
                     registerReceiver();
                 }
+                Log.e(TAG, "onStartTraceCallback" + message);
+
                 viewUtil.showToast(MainActivity.this,
                         String.format("onStartTraceCallback, errorNo:%d, message:%s ", errorNo, message));
             }
@@ -477,6 +482,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
              */
             @Override
             public void onStopTraceCallback(int errorNo, String message) {
+                Log.e(TAG, "onStopTraceCallback" + message);
+
                 if (StatusCodes.SUCCESS == errorNo || StatusCodes.CACHE_TRACK_NOT_UPLOAD == errorNo) {
                     trackApp.isTraceStarted = false;
                     trackApp.isGatherStarted = false;
@@ -505,6 +512,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
              */
             @Override
             public void onStartGatherCallback(int errorNo, String message) {
+                Log.e(TAG, "onStartGatherCallback " + message);
+
                 if (StatusCodes.SUCCESS == errorNo || StatusCodes.GATHER_STARTED == errorNo) {
                     trackApp.isGatherStarted = true;
                     SharedPreferences.Editor editor = trackApp.trackConf.edit();
@@ -528,6 +537,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
              */
             @Override
             public void onStopGatherCallback(int errorNo, String message) {
+                Log.e(TAG, "onStopGatherCallback" + message);
+
                 if (StatusCodes.SUCCESS == errorNo || StatusCodes.GATHER_STOPPED == errorNo) {
                     trackApp.isGatherStarted = false;
                     SharedPreferences.Editor editor = trackApp.trackConf.edit();

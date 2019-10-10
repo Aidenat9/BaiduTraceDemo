@@ -24,7 +24,7 @@ public class CommonUtil {
 
     public static final double DISTANCE = 0.0001;
 
-    public static final String ENTITY_NAME = "myTrace";
+    public static final String ENTITY_NAME = "myTrace2";
 
     public static String getCurProcessName(Context context) {
         int pid = android.os.Process.myPid();
