@@ -1,0 +1,56 @@
+<resources>
+    <string name="app_name">BaiduNavigationApplication</string>
+    <string name="font_type">微软雅黑</string>
+
+    <string name="app_title">百度鹰眼Android SDK</string>
+
+    <!-- 公共字符串 -->
+    <string name="all_supplement_model">里程补偿方式:</string>
+    <string name="all_coord_type">坐标类型:</string>
+    <string name="all_cancel">取消</string>
+    <string name="all_sure">确定</string>
+    <string name="all_fence_operate">围栏操作</string>
+    <!-- 报警通知标题 -->
+    <string name="alarm_push_title">百度鹰眼报警推送</string>
+    <!-- 公共字符串 里程补偿选项 -->
+    <string name="no_supplement">不补充</string>
+    <string name="straight">直线距离</string>
+    <string name="driving">最短驾车路线</string>
+    <string name="riding">最短骑行路线</string>
+    <string name="walking">最短步行路线</string>
+    <!-- CacheManageActivity 选项 -->
+    <string name="query_cache_track">查询缓存轨迹信息</string>
+    <string name="clear_cache_track">清除缓存轨迹信息</string>
+
+    <string name="no_track_data">未查询到轨迹</string>
+
+    <string name="loc_failed">定位失败</string>
+    <!-- 追踪控制子选项 -->
+    <string name="start_trace">开启服务</string>
+    <string name="stop_trace">停止服务</string>
+    <string name="start_gather">开启采集</string>
+    <string name="stop_gather">停止采集</string>
+
+    <!-- 轨迹分析子选项 -->
+    <string name="speeding">超 速</string>
+    <string name="harsh_breaking">急刹车</string>
+    <string name="harsh_accel">急变速</string>
+    <string name="harsh_steering">急转弯</string>
+    <string name="stay_point">停留点</string>
+
+    <!-- 轨迹分析详情子选项 -->
+    <string name="loc_time">定位时间</string>
+    <string name="actual_speed">实际行驶速度：</string>
+    <string name="limit_speed">限定最高时速：</string>
+    <string name="acceleration">实际加速度：</string>
+    <string name="initial_speed_1">加速前时速：</string>
+    <string name="end_speed_1">加速后时速：</string>
+    <string name="initial_speed_2">刹车前时速：</string>
+    <string name="end_speed_2">刹车后时速：</string>
+    <string name="centripetal_acceleration">向心加速度：</string>
+    <string name="turn_type">转向类型：</string>
+    <string name="turn_speed">转向时速：</string>
+    <string name="stay_start_time">开始时间：</string>
+    <string name="stay_end_time">结束时间：</string>
+    <string name="stay_duration">停留时长：</string>
+</resources>
