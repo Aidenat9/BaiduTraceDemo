@@ -14,12 +14,11 @@ import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.Overlay;
-import com.baidu.mapapi.utils.CoordinateConverter;
-
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.PolylineOptions;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.model.LatLngBounds;
+import com.baidu.mapapi.utils.CoordinateConverter;
 import com.baidu.trace.model.CoordType;
 import com.baidu.trace.model.SortType;
 import com.baidu.trace.model.TraceLocation;
@@ -41,14 +40,14 @@ public class MapUtil {
 
     public MapView mapView = null;
 
-    public static BitmapDescriptor bmArrowPoint = null;
+    public static BitmapDescriptor bmArrowPoint = BitmapUtil.bmArrowPoint;
 
-    public static BitmapDescriptor bmEnd = null;
+    public static BitmapDescriptor bmEnd = BitmapUtil.bmEnd;
 
     public BaiduMap baiduMap = null;
 
     public LatLng lastPoint = null;
-    public static BitmapDescriptor bmStart = null;
+    public static BitmapDescriptor bmStart = BitmapUtil.bmStart;
 
 
     /**

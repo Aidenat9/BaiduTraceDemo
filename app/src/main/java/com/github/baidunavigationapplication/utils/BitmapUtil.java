@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.github.baidunavigationapplication.R;
-
 /**
  * Created by baidu on 17/3/8.
  */

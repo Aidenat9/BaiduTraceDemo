@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button gatherBtn = null;
 
 
-    private int notifyId = 0;
+    private int notifyId = 10;
     private MapView mapView;
 
     /**
@@ -192,7 +192,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void init2() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1001);
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1011);
         }
         BitmapUtil.init();
         initListener();
@@ -226,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         historyTrackRequest.setEntityName(trackApp.entityName);
 //设置轨迹查询起止时间
 // 开始时间(单位：秒)
-        long startTime = CommonUtil.getCurrentTime();
+        long startTime = CommonUtil.getCurrentTime()-1000*60*60*48;
 // 结束时间(单位：秒)
         long endTime = CommonUtil.getCurrentTime();
         historyTrackRequest.setSupplementMode(SupplementMode.walking);
@@ -320,41 +321,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initListener() {
-        trackListener = new OnTrackListener() {
-            /**
-             * 轨迹上传
-             */
-            @Override
-            public void onLatestPointCallback(LatestPointResponse response) {
-                if (StatusCodes.SUCCESS != response.getStatus()) {
-                    return;
-                }
-
-                LatestPoint point = response.getLatestPoint();
-                if (null == point || CommonUtil.isZeroPoint(point.getLocation().getLatitude(), point.getLocation()
-                        .getLongitude())) {
-                    return;
-                }
-
-                LatLng currentLatLng = mapUtil.convertTrace2Map(point.getLocation());
-                if (null == currentLatLng) {
-                    return;
-                }
-                CurrentLocation.locTime = point.getLocTime();
-                CurrentLocation.latitude = currentLatLng.latitude;
-                CurrentLocation.longitude = currentLatLng.longitude;
-
-                if (null != mapUtil) {
-                    mapUtil.updateStatus(currentLatLng, true);
-                }
-                Log.e(TAG, "onLatestPointCallback");
-
-                //上传后立刻查询轨迹、里程，更新
-                historyTrackRequest.setEndTime(CommonUtil.getCurrentTime());
-                trackApp.mClient.queryHistoryTrack(historyTrackRequest, trackListener);
-                trackApp.mClient.queryDistance(distanceRequest, trackListener);
-                distanceRequest.setEndTime(CommonUtil.getCurrentTime());
-            }
+       final OnTrackListener trackListener2 = new OnTrackListener() {
 
             /**
              * 里程
@@ -366,7 +333,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 double lowSpeedDistance = distanceResponse.getLowSpeedDistance();
                 dialog.setMessage("轨迹里程：" + lowSpeedDistance);
             }
-
             /**
              * 历史轨迹回调
              */
@@ -392,7 +358,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 mapUtil.drawHistoryTrack(trackPoints, sortType);
             }
+        };
+        trackListener = new OnTrackListener() {
+            /**
+             * 轨迹上传
+             */
+            @Override
+            public void onLatestPointCallback(LatestPointResponse response) {
+                if (StatusCodes.SUCCESS != response.getStatus()) {
+                    return;
+                }
 
+                LatestPoint point = response.getLatestPoint();
+                if (null == point || CommonUtil.isZeroPoint(point.getLocation().getLatitude(), point.getLocation()
+                        .getLongitude())) {
+                    return;
+                }
+
+                LatLng currentLatLng = mapUtil.convertTrace2Map(point.getLocation());
+                if (null == currentLatLng) {
+                    return;
+                }
+                CurrentLocation.locTime = point.getLocTime();
+                CurrentLocation.latitude = currentLatLng.latitude;
+                CurrentLocation.longitude = currentLatLng.longitude;
+
+//                if (null != mapUtil) {
+//                    mapUtil.updateStatus(currentLatLng, true);
+//                }
+                Log.e(TAG, "onLatestPointCallback");
+
+                //上传后立刻查询轨迹、里程，更新
+                historyTrackRequest.setEndTime(CommonUtil.getCurrentTime());
+                distanceRequest.setEndTime(CommonUtil.getCurrentTime());
+                trackApp.mClient.queryHistoryTrack(historyTrackRequest, trackListener2);
+                trackApp.mClient.queryDistance(distanceRequest, trackListener2);
+            }
         };
         entityListener = new OnEntityListener() {
             /**
@@ -466,7 +467,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.e(TAG, "onStartTraceCallback" + message);
 
                 viewUtil.showToast(MainActivity.this,
-                        String.format("onStartTraceCallback, errorNo:%d, message:%s ", errorNo, message));
+                        String.format("开启服务回调接口, errorNo:%d, message:%s ", errorNo, message));
             }
 
             /**
@@ -565,7 +566,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
              */
             @Override
             public void onPushCallback(byte messageType, PushMessage pushMessage) {
-                if (messageType < 0x03 || messageType > 0x04) {
+                viewUtil.showToast(MainActivity.this,"推送消息回调");
+if (messageType < 0x03 || messageType > 0x04) {
                     viewUtil.showToast(MainActivity.this, pushMessage.getMessage());
                     return;
                 }
@@ -585,7 +587,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
                     Notification notification = new Notification.Builder(trackApp)
-                            .setContentTitle(getResources().getString(R.string.alarm_push_title))
+                            .setContentTitle("轨迹记录查询通知")
                             .setContentText(alarmInfo.toString())
                             .setSmallIcon(R.mipmap.icon_app)
                             .setWhen(System.currentTimeMillis()).build();
@@ -763,21 +765,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
         mapUtil.clear();
         stopRealTimeLoc();
-        CommonUtil.saveCurrentLocation(trackApp);
-        if (trackApp.trackConf.contains("is_trace_started")
-                && trackApp.trackConf.getBoolean("is_trace_started", true)) {
-            // 退出app停止轨迹服务时，不再接收回调，将OnTraceListener置空
-            trackApp.mClient.setOnTraceListener(null);
-            trackApp.mClient.stopTrace(trackApp.mTrace, null);
-        } else {
-            trackApp.mClient.clear();
-        }
-        trackApp.isTraceStarted = false;
-        trackApp.isGatherStarted = false;
-        SharedPreferences.Editor editor = trackApp.trackConf.edit();
-        editor.remove("is_trace_started");
-        editor.remove("is_gather_started");
-        editor.apply();
+//        CommonUtil.saveCurrentLocation(trackApp);
+//        if (trackApp.trackConf.contains("is_trace_started")
+//                && trackApp.trackConf.getBoolean("is_trace_started", true)) {
+//            // 退出app停止轨迹服务时，不再接收回调，将OnTraceListener置空
+//            trackApp.mClient.setOnTraceListener(null);
+//            trackApp.mClient.stopTrace(trackApp.mTrace, null);
+//        } else {
+//            trackApp.mClient.clear();
+//        }
+//        trackApp.isTraceStarted = false;
+//        trackApp.isGatherStarted = false;
+//        SharedPreferences.Editor editor = trackApp.trackConf.edit();
+//        editor.remove("is_trace_started");
+//        editor.remove("is_gather_started");
+//        editor.apply();
     }
 
 }

@@ -97,7 +97,7 @@ public class TrackApplication extends Application {
         initNotification();
         mClient = new LBSTraceClient(mContext);
         // 设置协议类型，0为http，1为https
-        mClient.setProtocolType(ProtocolType.HTTPS);
+//        mClient.setProtocolType(ProtocolType.HTTPS);
         mTrace = new Trace(serviceId, entityName);
         mTrace.setNotification(notification);
 
