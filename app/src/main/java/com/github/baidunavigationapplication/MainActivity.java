@@ -231,7 +231,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 // 结束时间(单位：秒)
         long endTime = CommonUtil.getCurrentTime();
         historyTrackRequest.setSupplementMode(SupplementMode.walking);
-
         historyTrackRequest.setSortType(SortType.asc);
 // 设置开始时间
         historyTrackRequest.setStartTime(startTime);
