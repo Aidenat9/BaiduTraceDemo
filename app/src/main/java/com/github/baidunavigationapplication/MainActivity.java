@@ -227,10 +227,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         historyTrackRequest.setEntityName(trackApp.entityName);
 //设置轨迹查询起止时间
 // 开始时间(单位：秒)
-        long startTime = CommonUtil.getCurrentTime()-1000*60*60*48;
+        long startTime = CommonUtil.getCurrentTime()-60*60*19;
 // 结束时间(单位：秒)
         long endTime = CommonUtil.getCurrentTime();
         historyTrackRequest.setSupplementMode(SupplementMode.walking);
+
         historyTrackRequest.setSortType(SortType.asc);
 // 设置开始时间
         historyTrackRequest.setStartTime(startTime);
