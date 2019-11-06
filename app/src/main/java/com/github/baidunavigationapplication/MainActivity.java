@@ -351,6 +351,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         for (TrackPoint trackPoint : points) {
                             if (!CommonUtil.isZeroPoint(trackPoint.getLocation().getLatitude(),
                                     trackPoint.getLocation().getLongitude())) {
+                                if(null!=trackPoints&&trackPoints.size()>0){
+                                    trackPoints.clear();
+                                }
                                 trackPoints.add(MapUtil.convertTrace2Map(trackPoint.getLocation()));
                             }
                         }
